@@ -29,7 +29,9 @@ export function createClient({ baseUrl = '/api', fetchImpl = globalThis.fetch, s
       }
       if (response.status === 204 || response.status === 205) return undefined;
       if (responseType === 'blob') return { blob: await response.blob(), disposition: response.headers.get('Content-Disposition') };
-      try { return await response.json(); }
+      const text = await response.text();
+      if (!text.trim()) return undefined;
+      try { return JSON.parse(text); }
       catch { throw new ApiError(response.status, 'INVALID_RESPONSE', '서버 응답 형식을 확인해 주세요.'); }
     } catch (error) {
       if (error instanceof ApiError) throw error;
